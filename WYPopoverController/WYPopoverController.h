@@ -123,6 +123,7 @@ typedef NS_OPTIONS(NSUInteger, WYPopoverAnimationOptions) {
 // initialization
 
 - (id)initWithContentViewController:(UIViewController *)viewController;
+- (id)initWithContentViewController:(UIViewController *)aViewController parentViewController:(UIViewController *)parentViewController;
 
 // theme
 

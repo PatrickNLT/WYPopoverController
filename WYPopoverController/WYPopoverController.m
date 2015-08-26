@@ -1426,7 +1426,8 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
 ////////////////////////////////////////////////////////////////////////////
 
 @interface WYPopoverController () <WYPopoverOverlayViewDelegate, WYPopoverBackgroundViewDelegate> {
-  UIViewController        *_viewController;
+    UIViewController        *_viewController;
+    UIViewController        *_parentViewController;
   CGRect                   _rect;
   UIView                  *_inView;
   WYPopoverOverlayView    *_overlayView;
@@ -1572,14 +1573,19 @@ static WYPopoverTheme *defaultTheme_ = nil;
   return self;
 }
 
+- (id)initWithContentViewController:(UIViewController *)aViewController parentViewController:(UIViewController *)parentViewController {
+    self = [self init];
+
+    if (self) {
+        _viewController = aViewController;
+        _parentViewController = parentViewController;
+    }
+
+    return self;
+}
+
 - (id)initWithContentViewController:(UIViewController *)aViewController {
-  self = [self init];
-
-  if (self) {
-    _viewController = aViewController;
-  }
-
-  return self;
+    return [self initWithContentViewController:aViewController parentViewController:nil];
 }
 
 - (void)setTheme:(WYPopoverTheme *)value {
@@ -1816,9 +1822,9 @@ static WYPopoverTheme *defaultTheme_ = nil;
       tap.cancelsTouchesInView = NO;
       [_backgroundView addGestureRecognizer:tap];
     }
-
-    [_inView.window addSubview:_backgroundView];
-    [_inView.window insertSubview:_overlayView belowSubview:_backgroundView];
+      UIView *parentView = _parentViewController ? _parentViewController.view : _inView.window;
+      [parentView addSubview:_backgroundView];
+      [parentView insertSubview:_overlayView belowSubview:_backgroundView];
   }
 
   [self updateThemeUI];
@@ -2323,8 +2329,11 @@ static WYPopoverTheme *defaultTheme_ = nil;
 
   _backgroundView.wantsDefaultContentAppearance = _wantsDefaultContentAppearance;
 
+  [_parentViewController addChildViewController:_viewController];
   [_backgroundView setViewController:_viewController];
-
+    if (_parentViewController) {
+        [_viewController didMoveToParentViewController:_viewController];
+    }
   // keyboard support
   if (keyboardHeight > 0) {
 
